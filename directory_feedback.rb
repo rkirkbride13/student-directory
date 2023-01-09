@@ -1,4 +1,5 @@
 @students = [] # an empty array accessible to all methods
+@filename = "" # an empty string accessible to all methods
 
 def input_students
   puts "Please enter the name of the students"
@@ -30,15 +31,15 @@ def print_students_list
 end
 
 def print_footer
-    puts "Overall, we have #{@students.count} great students"
+    puts "Overall, we have #{@students.count} great students", ""
 end
 
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
-  puts "3. Save the list to stundents.csv"
-  puts "4. Load the list from students.csv"
-  puts "9. Exit"
+  puts "3. Save the list to a file"
+  puts "4. Load the list from a file"
+  puts "9. Exit", ""
 end
 
 def show_students
@@ -47,7 +48,7 @@ def show_students
   print_footer
 end
 
-def process(selection) # try making this a hash instead.
+def process(selection)
   case selection
   when "1"
     input_students
@@ -56,11 +57,11 @@ def process(selection) # try making this a hash instead.
   when "3"
     save_students
   when "4"
-    load_students
+    try_load_students
   when "9"
     exit
   else
-    puts "I don't know what you meant, try again"
+    puts "I don't know what you meant, try again", ""
   end
 end
 
@@ -72,7 +73,9 @@ def interactive_menu
 end
 
 def save_students
-  file = File.open("students.csv", "w") do |file|
+  puts "What file do you want to save to?"
+  filename = "#{STDIN.gets.chomp}.csv"
+  file = File.open(filename, "w") do |file|
     @students.each do |student|
       student_data = [student[:name], student[:cohort]]
       csv_line = student_data.join(",")
@@ -81,8 +84,8 @@ def save_students
   end
 end
 
-def load_students(filename = "students.csv")
-  file = File.open(filename, "r") do |file|
+def load_students
+  file = File.open(@filename, "r") do |file|
     file.readlines.each do |line|
       name, cohort = line.chomp.split(",")
       push_students_to_hash(name, cohort)
@@ -91,14 +94,21 @@ def load_students(filename = "students.csv")
 end
 
 def try_load_students
-  filename = ARGV.first # the first argument from the command line
-  if filename.nil? then filename = "students.csv" end
+  @filename = ARGV.first # the first argument from the command line
+  if @filename.nil?
+    puts "What file do you want to load?" 
+    @filename = "#{STDIN.gets.chomp}.csv"
+  end
+  file_exist?(@filename) ? load_students : interactive_menu
+end
+
+def file_exist?(filename)
   if File.exist?(filename)
-    load_students(filename)
-    puts "Loaded #{@students.count} from #{filename}"
+    puts "Loaded #{filename}", ""
+    true
   else # if it doesn't exist
-    puts "Sorry, #{filename} doesn't exist."
-    exit # quit the program
+    puts "Sorry, #{filename} doesn't exist.", ""
+    false
   end
 end
 
